@@ -1,6 +1,16 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 import pytest
 
 from core import db, orders
+from core.config import APP_TIMEZONE
+
+_TZ = ZoneInfo(APP_TIMEZONE)
+
+
+def _today_key():
+    return datetime.now(_TZ).date()
 
 
 @pytest.fixture(autouse=True)
@@ -85,3 +95,52 @@ def test_status_history_records_each_change():
         ("new", "confirmed"),
         ("confirmed", "cancelled"),
     ]
+
+
+def test_update_order_edits_fields_and_normalizes_phone():
+    order_id = _create(amount=1000.0)
+    orders.update_order(
+        order_id, address="ул. Мира 2", amount=2000.0, prepayment=0.0
+    )
+    order = orders.get_order(order_id)
+    assert order["address"] == "ул. Мира 2"
+    assert order["amount"] == 2000.0
+    assert order["prepayment"] == 0.0
+
+    orders.update_order(order_id, phone="8 (903) 111-22-33")
+    order = orders.get_order(order_id)
+    assert order["phone_raw"] == "8 (903) 111-22-33"
+    assert order["phone_norm"] == "9031112233"
+
+
+def test_update_order_prepayment_bounds():
+    order_id = _create(amount=1000.0)
+    with pytest.raises(ValueError):
+        orders.update_order(order_id, amount=500.0, prepayment=600.0)
+
+
+def test_list_orders_multiselect_and_phone_filter():
+    order_id = _create(amount=100.0)
+    orders.change_status(order_id, "cancelled", comment="Передумал")
+
+    rows = orders.list_orders({"statuses": ["new", "delivered"]})
+    assert all(r["status"] in ("new", "delivered") for r in rows)
+
+    rows = orders.list_orders({"statuses": ["cancelled"]})
+    assert [r["id"] for r in rows] == [order_id]
+
+
+def test_daily_summary_excludes_cancelled_amount():
+    _create(amount=1000.0)
+    cancelled_id = _create(amount=500.0)
+    orders.change_status(cancelled_id, "cancelled", comment="Передумал")
+
+    delivered_id = _create(amount=700.0)
+    for status in ("confirmed", "in_transit", "delivered"):
+        orders.change_status(delivered_id, status)
+
+    summary = orders.daily_summary(_today_key())
+    assert summary["orders"] == 3
+    assert summary["amount"] == 1700.0
+    assert summary["delivered"] == 1
+    assert summary["cancelled"] == 1
