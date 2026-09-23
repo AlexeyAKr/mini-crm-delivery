@@ -1,0 +1,1 @@
+"""TODO: GigaChat parser — День 3."""
