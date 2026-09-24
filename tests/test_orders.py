@@ -119,6 +119,22 @@ def test_update_order_prepayment_bounds():
         orders.update_order(order_id, amount=500.0, prepayment=600.0)
 
 
+def test_create_order_prepayment_exceeds_amount_rejected():
+    with pytest.raises(ValueError):
+        orders.create_order(
+            name="Иван",
+            phone="+7 (912) 345-67-89",
+            amount=1000.0,
+            prepayment=1500.0,
+        )
+
+
+def test_create_order_defaults_prepayment_to_half_amount():
+    order_id = _create(amount=2000.0)
+    order = orders.get_order(order_id)
+    assert order["prepayment"] == round(2000.0 * 0.5, 2)
+
+
 def test_list_orders_multiselect_and_phone_filter():
     order_id = _create(amount=100.0)
     orders.change_status(order_id, "cancelled", comment="Передумал")

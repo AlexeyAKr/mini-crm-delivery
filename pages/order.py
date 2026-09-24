@@ -38,13 +38,13 @@ def _apply_transition(order_id: int, target: str, comment: str | None) -> None:
 
 st.title("Карточка заказа")
 
-raw_id = st.query_params.get("order_id")
+raw_id = st.session_state.get("selected_order_id") or st.query_params.get("order_id")
 if not raw_id:
     st.info("Выберите заказ в разделе «Заказы»")
     st.stop()
 try:
     order_id = int(raw_id)
-except ValueError:
+except (TypeError, ValueError):
     st.error("Некорректный ID заказа")
     st.stop()
 

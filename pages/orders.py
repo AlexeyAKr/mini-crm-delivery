@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import pandas as pd
 import streamlit as st
 
 from core import db, orders
@@ -19,7 +18,8 @@ _CHANNELS = {
     "manual": "Ручной ввод",
 }
 
-_COLUMNS = ["ID", "Дата", "Клиент", "Телефон", "Статус", "Канал", "Сумма, ₽"]
+_HEADERS = ["ID", "Дата", "Клиент", "Телефон", "Статус", "Канал", "Сумма, ₽", ""]
+_COL_WIDTHS = [1, 1.6, 2.2, 1.6, 1.4, 1.2, 1.3, 1.2]
 
 st.title("Заказы")
 
@@ -67,24 +67,21 @@ if not rows:
     st.info("Заказов по выбранным фильтрам не найдено")
     st.stop()
 
-data = []
-for r in rows:
-    data.append([
-        r["id"],
-        (r["created_at"] or "")[:10],
-        r["client_name"],
-        format_phone(r["phone_raw"] or ""),
-        STATUS_LABELS.get(r["status"], r["status"]),
-        _CHANNELS.get(r["channel"], r["channel"]),
-        round(r["amount"] or 0, 2),
-    ])
-df = pd.DataFrame(data, columns=_COLUMNS)
-
-event = st.dataframe(df, hide_index=True, width="stretch",
-                     on_select="rerun", selection_mode="single-row")
-if event.selection.rows:
-    row = df.iloc[event.selection.rows[0]]
-    st.query_params["order_id"] = str(row["ID"])
-    st.switch_page("pages/order.py")
-
 st.caption(f"Показано заказов: {len(rows)}")
+
+cols = st.columns(_COL_WIDTHS)
+for col, header in zip(cols, _HEADERS):
+    col.caption(header)
+
+for r in rows:
+    cols = st.columns(_COL_WIDTHS)
+    cols[0].write(str(r["id"]))
+    cols[1].write((r["created_at"] or "")[:10])
+    cols[2].write(r["client_name"] or "—")
+    cols[3].write(format_phone(r["phone_raw"] or ""))
+    cols[4].write(STATUS_LABELS.get(r["status"], r["status"]))
+    cols[5].write(_CHANNELS.get(r["channel"], r["channel"]))
+    cols[6].write(f"{round(r['amount'] or 0, 2):,.2f}".replace(",", " "))
+    if cols[7].button("Открыть", key=f"open_order_{r['id']}"):
+        st.session_state["selected_order_id"] = r["id"]
+        st.switch_page("pages/order.py")
