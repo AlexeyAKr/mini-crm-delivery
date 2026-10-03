@@ -51,11 +51,12 @@ def parse_request(text: str) -> dict | None:
         with GigaChat(
             credentials=GIGACHAT_CREDENTIALS,
             scope=GIGACHAT_SCOPE,
+            model="GigaChat-2",
             verify_ssl_certs=False,
             timeout=30,
         ) as giga:
-            response = giga.chat(messages=messages)
+            response = giga.chat.create(messages=messages)
     except Exception as exc:
         logger.warning("GigaChat request failed: %s", exc)
         raise GigaChatUnavailableError from exc
-    return _extract_json(response.choices[0].message.content)
+    return _extract_json(response.messages[0].content[0].text)
