@@ -112,7 +112,7 @@
 ## Ссылки
 
 - **Репозиторий:** https://github.com/AlexeyAKr/mini-crm-delivery
-- **Демо-видео:** https://youtu.be/IRCYPV4FVcs (Unlisted)
+- **Демо-видео:** https://vkvideo.ru/video-241598165_456239017
 
 ## Ограничения
 

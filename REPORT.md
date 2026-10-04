@@ -1,4 +1,4 @@
-# Отчёт по проекту Mini-CRM доставки ChinaGoods
+﻿# Отчёт по проекту Mini-CRM доставки ChinaGoods
 
 **Студент:** AlexeyAKr
 **Курс:** Zerocoder, вайб-кодинг
@@ -7,7 +7,7 @@
 ## Ссылки
 
 - **Репозиторий:** https://github.com/AlexeyAKr/mini-crm-delivery
-- **Демо-видео:** https://youtu.be/IRCYPV4FVcs (Unlisted — доступно по ссылке)
+- **Демо-видео:** https://vkvideo.ru/video-241598165_456239017
 - **Кейс:** в файле CASE.md в репозитории
 
 ## Краткое описание
