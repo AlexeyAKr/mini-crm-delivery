@@ -8,6 +8,7 @@
 
 - **Репозиторий:** https://github.com/AlexeyAKr/mini-crm-delivery
 - **Демо-видео:** https://vkvideo.ru/video-241598165_456239017
+- **Живое приложение:** https://mini-crm-delivery-hnpcznbpw7siqqta2jpwkp.streamlit.app
 - **Кейс:** в файле CASE.md в репозитории
 
 ## Краткое описание
